@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoopTrack | Digital Records for African Farming Cooperatives</title>
+  <meta name="description" content="CoopTrack helps farming cooperatives across Africa record farmer deliveries, payments and stock accurately and catch errors before they cause disputes.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23166534'/%3E%3Cpath d='M16 26V12m0 0c0-4 2.5-6.5 6-7-.2 3.8-2.2 6.6-6 7zm0 6c0-3.4-2.3-5.6-5.5-6 .2 3.3 2.3 5.6 5.5 6z' stroke='%23f2b134' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --green: #166534;
+      --green-2: #14532d;
+      --green-3: #0b3a1f;
+      --leaf: #22a05a;
+      --gold: #f2b134;
+      --clay: #c4552f;
+      --cream: #f6f3ec;
+      --ink: #10231a;
+      --muted: #5b6b61;
+      --line: #e3ddcf;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; color: var(--ink); background: var(--cream); overflow-x: hidden; line-height: 1.65; }
+    h1, h2, h3, h4, h5 { font-family: 'Outfit', sans-serif; letter-spacing: -.01em; line-height: 1.15; }
+    a { text-decoration: none; }
+    section[id] { scroll-margin-top: 80px; }
+
+    /* ---------- buttons ---------- */
+    .btn-ct, .btn-ct-light, .btn-ct-outline {
+      display: inline-flex; align-items: center; gap: 8px; padding: 13px 28px; border-radius: 50px;
+      font-weight: 600; border: 2px solid transparent; transition: .25s; cursor: pointer;
+    }
+    .btn-ct { background: var(--green); color: #fff; }
+    .btn-ct:hover { background: var(--green-2); color: #fff; transform: translateY(-3px); box-shadow: 0 12px 24px -10px rgba(22,101,52,.7); }
+    .btn-gold { background: var(--gold); color: var(--green-3); }
+    .btn-gold:hover { background: #ffc34e; color: var(--green-3); transform: translateY(-3px); box-shadow: 0 12px 24px -10px rgba(242,177,52,.8); }
+    .btn-ct-light { background: #fff; color: var(--green); }
+    .btn-ct-light:hover { background: var(--cream); color: var(--green-2); transform: translateY(-3px); }
+    .btn-ct-outline { border-color: rgba(255,255,255,.75); color: #fff; }
+    .btn-ct-outline:hover { background: #fff; color: var(--green); transform: translateY(-3px); }
+
+    /* ---------- header ---------- */
+    .site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1030; padding: 18px 0; transition: .35s; }
+    .site-nav .navbar-brand { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.6rem; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: var(--gold); color: var(--green-3); font-size: 1.15rem; }
+    .brand-name span { color: var(--gold); }
+    .site-nav .nav-link { color: rgba(255,255,255,.9) !important; font-weight: 500; padding: 8px 15px !important; border-radius: 50px; transition: .2s; }
+    .site-nav .nav-link:hover { color: var(--gold) !important; }
+    .navbar-toggler { border: 0; color: #fff; font-size: 2rem; padding: 0; }
+    .navbar-toggler:focus { box-shadow: none; }
+    .site-nav.scrolled { background: rgba(255,255,255,.97); box-shadow: 0 8px 30px -14px rgba(0,0,0,.35); padding: 11px 0; }
+    .site-nav.scrolled .navbar-brand { color: var(--green); }
+    .site-nav.scrolled .brand-name span { color: var(--leaf); }
+    .site-nav.scrolled .brand-mark { background: var(--green); color: var(--gold); }
+    .site-nav.scrolled .nav-link { color: var(--ink) !important; }
+    .site-nav.scrolled .nav-link:hover { color: var(--green) !important; }
+    .site-nav.scrolled .navbar-toggler { color: var(--green); }
+    .site-nav .btn-login { padding: 10px 24px; }
+    @media (max-width: 991px) {
+      .site-nav .navbar-collapse { background: #fff; border-radius: 18px; padding: 14px; margin-top: 12px; box-shadow: 0 20px 40px -20px rgba(0,0,0,.4); }
+      .site-nav .nav-link { color: var(--ink) !important; }
+    }
+
+    /* ---------- hero ---------- */
+    .hero { position: relative; height: 100vh; min-height: 640px; background: var(--green-3); }
+    .hero .carousel, .hero .carousel-inner, .hero .carousel-item { height: 100%; }
+    .hero .slide-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.06); }
+    .hero .carousel-item.active .slide-img { animation: kenburns 9s ease-out forwards; }
+    @keyframes kenburns { from { transform: scale(1.12); } to { transform: scale(1); } }
+    .hero .carousel-item::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, rgba(8,44,25,.92) 8%, rgba(11,58,31,.62) 55%, rgba(11,58,31,.25)); z-index: 1; pointer-events: none; }
+    .hero-caption { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; }
+    .hero-caption .inner { max-width: 720px; padding-top: 70px; }
+    .eyebrow-pill { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,.14); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.3); color: #fff; padding: 7px 18px; border-radius: 50px; font-size: .9rem; font-weight: 500; margin-bottom: 22px; }
+    .eyebrow-pill i { color: var(--gold); }
+    .hero h1 { color: #fff; font-size: clamp(2.5rem, 6vw, 4.6rem); font-weight: 800; margin-bottom: 22px; }
+    .hero h1 em { font-style: normal; color: var(--gold); }
+    .hero p.lead { color: rgba(255,255,255,.88); font-size: 1.2rem; max-width: 600px; margin-bottom: 32px; }
+    .hero .carousel-item .inner > * { opacity: 0; transform: translateY(26px); }
+    .hero .carousel-item.active .inner > * { animation: rise .8s cubic-bezier(.2,.7,.2,1) forwards; }
+    .hero .carousel-item.active .inner > *:nth-child(2) { animation-delay: .12s; }
+    .hero .carousel-item.active .inner > *:nth-child(3) { animation-delay: .24s; }
+    .hero .carousel-item.active .inner > *:nth-child(4) { animation-delay: .36s; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+    .hero .carousel-indicators { z-index: 3; bottom: 120px; }
+    .hero .carousel-indicators [data-bs-target] { width: 34px; height: 4px; border: 0; border-radius: 4px; }
+    .hero .carousel-control-prev, .hero .carousel-control-next { z-index: 3; width: 8%; }
+
+    /* quick strip that overlaps the hero */
+    .quick-strip { position: relative; z-index: 5; margin-top: -78px; }
+    .quick-card { background: #fff; border-radius: 18px; padding: 22px 24px; display: flex; gap: 16px; align-items: center; box-shadow: 0 24px 50px -24px rgba(11,58,31,.55); height: 100%; transition: .3s; }
+    .quick-card:hover { transform: translateY(-6px); }
+    .quick-card i { display: grid; place-items: center; width: 52px; height: 52px; flex: none; border-radius: 14px; background: #e6f4ea; color: var(--green); font-size: 1.5rem; transition: .3s; }
+    .quick-card:hover i { background: var(--green); color: var(--gold); }
+    .quick-card h3 { font-family: 'DM Sans', sans-serif; font-size: 1.02rem; font-weight: 700; margin: 0 0 2px; }
+    .quick-card p { margin: 0; color: var(--muted); font-size: .9rem; line-height: 1.4; }
+
+    /* ---------- generic sections ---------- */
+    .section { padding: 100px 0; }
+    .section-head { max-width: 680px; margin: 0 auto 56px; text-align: center; }
+    .eyebrow { display: inline-block; text-transform: uppercase; letter-spacing: .15em; font-size: .78rem; font-weight: 700; color: var(--clay); margin-bottom: 12px; position: relative; padding: 0 0 0 36px; }
+    .eyebrow::before { content: ""; position: absolute; left: 0; top: 50%; width: 26px; height: 3px; background: var(--gold); border-radius: 3px; }
+    .section-head h2, .h2-big { font-size: clamp(1.9rem, 3.6vw, 2.8rem); font-weight: 700; color: var(--green-2); margin-bottom: 14px; }
+    .section-head p { color: var(--muted); font-size: 1.1rem; }
+
+    /* ---------- features grid (like the template's services) ---------- */
+    .feature-grid { background: #fff; border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
+    .feature-grid .cell { padding: 36px 30px; height: 100%; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); position: relative; transition: .3s; }
+    .feature-grid .cell:hover { background: var(--green); }
+    .feature-grid .num { position: absolute; top: 18px; right: 22px; font-family: 'Outfit', sans-serif; font-weight: 700; color: #d8d2c2; transition: .3s; }
+    .feature-grid .ico { font-size: 2.6rem; color: var(--green); line-height: 1; margin-bottom: 18px; transition: .3s; }
+    .feature-grid h3 { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1.12rem; margin-bottom: 8px; transition: .3s; }
+    .feature-grid p { color: var(--muted); margin: 0; font-size: .95rem; transition: .3s; }
+    .feature-grid .cell:hover .ico { color: var(--gold); transform: scale(1.1) rotate(-5deg); }
+    .feature-grid .cell:hover h3, .feature-grid .cell:hover p, .feature-grid .cell:hover .num { color: #fff; }
+    .feature-grid .cell:hover p { color: rgba(255,255,255,.85); }
+
+    /* ---------- green about block ---------- */
+    .about-green { background: var(--green); color: #fff; position: relative; padding: 0; overflow: hidden; }
+    .about-green::before { content: ""; position: absolute; right: -140px; top: -140px; width: 460px; height: 460px; border-radius: 50%; background: radial-gradient(circle, rgba(242,177,52,.25), transparent 68%); }
+    .about-green .row { align-items: center; }
+    .about-photo { position: relative; margin-top: -50px; margin-bottom: -50px; z-index: 2; }
+    .about-photo img { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 22px; box-shadow: 0 30px 60px -25px rgba(0,0,0,.6); border: 8px solid var(--cream); }
+    .about-green .copy { padding: 110px 0 100px 30px; }
+    .about-green .eyebrow { color: var(--gold); }
+    .about-green h2 { color: #fff; font-size: clamp(1.9rem, 3.4vw, 2.7rem); }
+    .about-green p.sub { color: rgba(255,255,255,.75); }
+    .why { display: flex; gap: 16px; margin-top: 22px; }
+    .why i { font-size: 1.9rem; color: var(--gold); flex: none; }
+    .why h4 { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 700; margin: 0; }
+    .why p { margin: 0; color: rgba(255,255,255,.7); font-size: .95rem; }
+    @media (max-width: 991px) { .about-photo { margin: 60px 0 0; } .about-green .copy { padding: 50px 0 70px; } }
+
+    /* ---------- spotlight ---------- */
+    .spot-img { position: relative; }
+    .spot-img img.main { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 24px; box-shadow: 0 30px 60px -28px rgba(11,58,31,.6); }
+    .spot-img .badge-card { position: absolute; left: -22px; bottom: 34px; background: #fff; border-radius: 16px; padding: 14px 18px; display: flex; gap: 12px; align-items: center; box-shadow: 0 20px 40px -18px rgba(0,0,0,.5); animation: floaty 5s ease-in-out infinite; }
+    .spot-img .badge-card i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #fbe3d8; color: var(--clay); font-size: 1.2rem; }
+    .spot-img .badge-card strong { display: block; font-size: .92rem; }
+    .spot-img .badge-card small { color: var(--muted); }
+    @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+    .check-list { list-style: none; padding: 0; margin: 22px 0 28px; display: grid; gap: 11px; }
+    .check-list li { display: flex; gap: 12px; align-items: center; font-weight: 500; }
+    .check-list i { color: var(--leaf); font-size: 1.3rem; }
+
+    /* ---------- how it works (image cards) ---------- */
+    .how { background: var(--green-3); position: relative; }
+    .how .section-head h2 { color: #fff; }
+    .how .section-head p { color: rgba(255,255,255,.7); }
+    .how .eyebrow { color: var(--gold); }
+    .step-card { position: relative; border-radius: 22px; overflow: hidden; aspect-ratio: 3/4; background: #0f2f1c; }
+    .step-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .8s; }
+    .step-card:hover img { transform: scale(1.1); }
+    .step-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,44,25,.1) 30%, rgba(8,44,25,.92)); }
+    .step-card .txt { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px; z-index: 2; color: #fff; }
+    .step-card .no { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--gold); color: var(--green-3); font-family: 'Outfit', sans-serif; font-weight: 800; margin-bottom: 12px; }
+    .step-card h3 { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 6px; }
+    .step-card p { margin: 0; color: rgba(255,255,255,.8); font-size: .93rem; line-height: 1.5; }
+
+    /* ---------- users ---------- */
+    .user-card { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 34px 22px; text-align: center; height: 100%; transition: .3s; }
+    .user-card:hover { transform: translateY(-8px); box-shadow: 0 26px 50px -26px rgba(11,58,31,.5); }
+    .avatar { position: relative; width: 104px; height: 104px; margin: 0 auto 18px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.9rem; box-shadow: 0 0 0 5px #fff, 0 0 0 8px var(--gold); }
+    .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+    .avatar.has-photo img { display: block; }
+    .av1 { background: var(--clay); } .av2 { background: var(--green); } .av3 { background: var(--gold); color: var(--green-3); } .av4 { background: var(--leaf); }
+    .user-card h3 { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1.1rem; }
+    .user-card p { margin: 0; color: var(--muted); font-size: .95rem; }
+
+    /* ---------- CTA ---------- */
+    .cta { background: linear-gradient(120deg, var(--green-2), var(--green)); color: #fff; padding: 80px 0; position: relative; overflow: hidden; }
+    .cta::after { content: ""; position: absolute; right: -80px; bottom: -120px; width: 380px; height: 380px; border-radius: 50%; background: radial-gradient(circle, rgba(242,177,52,.3), transparent 70%); }
+    .cta h2 { color: #fff; font-size: clamp(1.8rem, 3.4vw, 2.6rem); }
+    .cta p { color: rgba(255,255,255,.8); }
+    .cta .container { position: relative; z-index: 2; }
+
+    /* ---------- contact ---------- */
+    .contact-card { height: 100%; background: var(--green-2); color: #fff; border-radius: 24px; padding: 38px; position: relative; overflow: hidden; }
+    .contact-card::after { content: ""; position: absolute; right: -60px; bottom: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(242,177,52,.4), transparent 70%); }
+    .contact-card h3 { color: #fff; font-size: 1.7rem; margin-bottom: 26px; }
+    .contact-card ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 22px; position: relative; z-index: 1; }
+    .contact-card li { display: flex; gap: 16px; align-items: center; }
+    .c-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: rgba(255,255,255,.12); color: var(--gold); font-size: 1.2rem; flex: none; }
+    .contact-card small { display: block; color: rgba(255,255,255,.6); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
+    .contact-card a, .contact-card span.val { color: #fff; font-weight: 600; word-break: break-all; }
+    .contact-card a:hover { color: var(--gold); }
+    .contact-form { background: #fff; border: 1px solid var(--line); border-radius: 24px; padding: 38px; }
+    .contact-form label { font-weight: 600; font-size: .92rem; margin-bottom: 6px; color: var(--green-2); }
+    .contact-form label span { font-weight: 400; color: var(--muted); }
+    .contact-form .form-control { border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 16px; background: #fbfaf6; }
+    .contact-form .form-control:focus { border-color: var(--leaf); box-shadow: 0 0 0 4px rgba(34,160,90,.15); background: #fff; }
+    .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    .form-alert { display: flex; gap: 10px; align-items: center; border-radius: 12px; padding: 13px 16px; margin-bottom: 18px; font-weight: 500; }
+    .form-alert.ok { background: #dcf3e4; color: #14602f; }
+    .form-alert.bad { background: #fbe3d8; color: #9b3a1b; }
+
+    /* ---------- footer ---------- */
+    footer { background: #08271a; color: rgba(255,255,255,.72); }
+    .kente { height: 14px; background-color: #10231a; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='14'%3E%3Crect width='56' height='14' fill='%2310231a'/%3E%3Cpath d='M0 14L14 0l14 14L42 0l14 14z' fill='%23f2b134'/%3E%3Cpath d='M0 14L14 4l14 10L42 4l14 10z' fill='%23c4552f'/%3E%3Cpath d='M0 14L14 8l14 6L42 8l14 6z' fill='%2322a05a'/%3E%3C/svg%3E"); background-size: 56px 14px; }
+    .foot-main { padding: 64px 0 36px; }
+    footer h5 { color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: .85rem; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 16px; }
+    footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    footer a { color: rgba(255,255,255,.78); transition: .2s; word-break: break-word; }
+    footer a:hover { color: var(--gold); }
+    footer li i { color: var(--gold); margin-right: 8px; }
+    .foot-bottom { border-top: 1px solid rgba(255,255,255,.1); padding: 22px 0 28px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: .9rem; }
+    .to-top { position: fixed; right: 20px; bottom: 20px; width: 46px; height: 46px; border-radius: 50%; background: var(--green); color: var(--gold); display: grid; place-items: center; font-size: 1.2rem; box-shadow: 0 10px 24px -8px rgba(0,0,0,.5); opacity: 0; visibility: hidden; transform: translateY(10px); transition: .3s; z-index: 1000; }
+    .to-top.show { opacity: 1; visibility: visible; transform: none; }
+
+    @media (max-width: 991px) { .section { padding: 72px 0; } .quick-strip { margin-top: -50px; } .hero .carousel-indicators { bottom: 90px; } }
+    @media (max-width: 767px) { .hero .carousel-control-prev, .hero .carousel-control-next { display: none; } }
+    @media (max-width: 575px) { .contact-card, .contact-form { padding: 26px; } .spot-img .badge-card { left: 8px; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } .hero .carousel-item .inner > * { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body>
+
+<!-- ===================== NAVBAR ===================== -->
+<nav class="site-nav navbar navbar-expand-lg" id="siteNav">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'landing' %}">
+      <span class="brand-mark"><i class="bi bi-flower2"></i></span>
+      <span class="brand-name">Coop<span>Track</span></span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-label="Open menu"><i class="bi bi-list"></i></button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="#how">How it works</a></li>
+        <li class="nav-item"><a class="nav-link" href="#users">Users</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+      </ul>
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="btn-ct btn-gold btn-login"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn-ct btn-gold btn-login"><i class="bi bi-box-arrow-in-right"></i> Staff Login</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== HERO SLIDER ===================== -->
+<header class="hero" id="home">
+  <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="6500">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner">
+
+      <div class="carousel-item active">
+        <img class="slide-img" data-img="hero1" data-fb="sunset" alt="African farmland at sunrise">
+        <div class="hero-caption"><div class="container"><div class="inner">
+          <span class="eyebrow-pill"><i class="bi bi-stars"></i> Karibu &mdash; welcome to CoopTrack</span>
+          <h1>Better Records. <em>Stronger</em> Cooperatives.</h1>
+          <p class="lead">CoopTrack helps farming cooperatives across Africa manage farmer deliveries, payments, stock and errors in one simple, powerful system.</p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="{% url 'login' %}" class="btn-ct btn-gold">Staff Login</a>
+            <a href="#features" class="btn-ct-outline btn-ct-light" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.75)">Explore Features</a>
+          </div>
+        </div></div></div>
+      </div>
+
+      <div class="carousel-item">
+        <img class="slide-img" data-img="hero2" data-fb="fields" alt="Green crop fields">
+        <div class="hero-caption"><div class="container"><div class="inner">
+          <span class="eyebrow-pill"><i class="bi bi-truck"></i> Deliveries &amp; payments</span>
+          <h1>Every delivery verified. Every farmer <em>paid right.</em></h1>
+          <p class="lead">Record produce the moment it arrives and link each payment to a verified delivery and receipt, so disputes never start.</p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="{% url 'register' %}" class="btn-ct btn-gold">Create Account</a>
+            <a href="#how" class="btn-ct-outline" style="color:#fff">See how it works</a>
+          </div>
+        </div></div></div>
+      </div>
+
+      <div class="carousel-item">
+        <img class="slide-img" data-img="hero3" data-fb="kente" alt="Farm landscape">
+        <div class="hero-caption"><div class="container"><div class="inner">
+          <span class="eyebrow-pill"><i class="bi bi-exclamation-triangle"></i> Error tracking</span>
+          <h1>Catch mistakes <em>before</em> they become disputes.</h1>
+          <p class="lead">Wrong farmer details, receipt mismatches and stock gaps are flagged automatically, so staff can fix them the same day.</p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="#about" class="btn-ct btn-gold">Why CoopTrack</a>
+            <a href="#contact" class="btn-ct-outline" style="color:#fff">Talk to us</a>
+          </div>
+        </div></div></div>
+      </div>
+
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+  </div>
+</header>
+
+<!-- quick strip -->
+<div class="quick-strip">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-6 col-lg-3" data-aos="fade-up"><div class="quick-card"><i class="bi bi-people-fill"></i><div><h3>Farmers</h3><p>Clear member records</p></div></div></div>
+      <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="80"><div class="quick-card"><i class="bi bi-truck"></i><div><h3>Deliveries</h3><p>Verified on arrival</p></div></div></div>
+      <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="160"><div class="quick-card"><i class="bi bi-cash-stack"></i><div><h3>Payments</h3><p>Matched to receipts</p></div></div></div>
+      <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="240"><div class="quick-card"><i class="bi bi-box-seam"></i><div><h3>Stock</h3><p>Always up to date</p></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== FEATURES ===================== -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head" data-aos="fade-up">
+      <span class="eyebrow">Features</span>
+      <h2>Everything your cooperative needs in one place</h2>
+      <p>Eight connected modules that work together, so every record checks the next.</p>
+    </div>
+
+    <div class="feature-grid" data-aos="fade-up">
+      <div class="row g-0">
+        <div class="col-md-6 col-lg-3"><div class="cell"><span class="num">01</span><div class="ico"><i class="bi bi-people"></i></div><h3>Farmer Registration</h3><p>Register each member once with phone number and main produce. Search and update any time.</p></div></div>
+        <div class="col-md-6 col-lg-3"><div class="cell"><span class="num">02</span><div class="ico"><i class="bi bi-truck"></i></div><h3>Delivery Recording</h3><p>Log produce, quantity, date and receipt number at the collection point, then verify.</p></div></div>
+        <div class="col-md-6 col-lg-3"><div class="cell"><span class="num">03</span><div class="ico"><i class="bi bi-cash-coin"></i></div><h3>Payment Management</h3><p>Link every payment to a delivery and receipt so the right farmer gets the right amount.</p></div></div>
+        <div class="col-md-6 col-lg-3"><div class="cell"><span class="num">04</span><div class="ico"><i class="bi bi-box-seam"></i></div><h3>Stock Management</h3><p>See stock received, dispatched and available, with mismatches shown early.</p></div></div>
+        <div class="col-md-6 col-lg-3"><div class="cell"><span class="num">05</span><div class="ico"><i class="bi bi-exclamation-triangle"></i></div><h3>Error Tracking</h3><p>Wrong details, receipt mismatches and late records listed for staff to correct.</p></div></div>
+        <div class="col-md-6 col-lg-3"><div class="cell"><span class="num">06</span><div class="ico"><i class="bi bi-bar-chart-line"></i></div><h3>Reports</h3><p>Farmer, delivery, payment and error reports for managers and committees.</p></div></div>
+        <div class="col-md-6 col-lg-3"><div class="cell"><span class="num">07</span><div class="ico"><i class="bi bi-bell"></i></div><h3>Notifications</h3><p>Alerts about mismatches and confirmations when a record is saved.</p></div></div>
+        <div class="col-md-6 col-lg-3"><div class="cell"><span class="num">08</span><div class="ico"><i class="bi bi-shield-lock"></i></div><h3>Secure Staff Access</h3><p>Password-protected accounts so only authorised staff can change records.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ABOUT (green block) ===================== -->
+<section class="about-green" id="about">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-5" data-aos="fade-right">
+        <div class="about-photo"><img data-img="about" data-fb="sunset" alt="Farmer with fresh produce"></div>
+      </div>
+      <div class="col-lg-7" data-aos="fade-left">
+        <div class="copy">
+          <span class="eyebrow">Why CoopTrack</span>
+          <h2>Built for African farming cooperatives</h2>
+          <p class="sub">Many cooperatives still rely on paper books and scattered spreadsheets. That leads to lost records, payment mistakes and late reports. CoopTrack replaces them with one secure, simple system.</p>
+          <div class="why"><i class="bi bi-person-check"></i><div><h4>Correct farmer records</h4><p>Every delivery is linked to the right farmer.</p></div></div>
+          <div class="why"><i class="bi bi-patch-check"></i><div><h4>Verified deliveries and payments</h4><p>Receipts, deliveries and payments are matched automatically.</p></div></div>
+          <div class="why"><i class="bi bi-box-seam"></i><div><h4>Reliable stock figures</h4><p>Stock updates as produce is received and dispatched.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SPOTLIGHT ===================== -->
+<section class="section" style="padding-top:150px">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6 order-lg-2" data-aos="zoom-in">
+        <div class="spot-img">
+          <img class="main" data-img="spot" data-fb="fields" alt="Cooperative staff recording deliveries">
+          <div class="badge-card"><i class="bi bi-exclamation-triangle-fill"></i><div><strong>1 record needs correction</strong><small>Receipt mismatch flagged &middot; sample</small></div></div>
+        </div>
+      </div>
+      <div class="col-lg-6 order-lg-1" data-aos="fade-up">
+        <span class="eyebrow">What makes it different</span>
+        <h2 class="h2-big">It does not only store records. It checks them.</h2>
+        <p class="text-muted">CoopTrack compares deliveries, receipts, payments and stock, and tells staff when something does not match, so errors are fixed the same day.</p>
+        <ul class="check-list">
+          <li><i class="bi bi-check2-circle"></i> Wrong farmer information</li>
+          <li><i class="bi bi-check2-circle"></i> Receipt and payment mismatches</li>
+          <li><i class="bi bi-check2-circle"></i> Stock that does not add up</li>
+          <li><i class="bi bi-check2-circle"></i> Late delivery records</li>
+        </ul>
+        <a href="{% url 'login' %}" class="btn-ct">Open the system <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section class="section how" id="how">
+  <div class="container">
+    <div class="section-head" data-aos="fade-up">
+      <span class="eyebrow">How it works</span>
+      <h2>From the farm gate to the final report</h2>
+      <p>Four simple steps that fit the way cooperatives already work.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3" data-aos="fade-up"><div class="step-card"><img data-img="step1" data-fb="fields" alt=""><div class="txt"><span class="no">1</span><h3>Register farmers</h3><p>Add each member with phone number and main produce.</p></div></div></div>
+      <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="100"><div class="step-card"><img data-img="step2" data-fb="sunset" alt=""><div class="txt"><span class="no">2</span><h3>Record deliveries</h3><p>Log produce, quantity, date and receipt number.</p></div></div></div>
+      <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="200"><div class="step-card"><img data-img="step3" data-fb="kente" alt=""><div class="txt"><span class="no">3</span><h3>Verify and pay</h3><p>Match each payment to a verified delivery.</p></div></div></div>
+      <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="300"><div class="step-card"><img data-img="step4" data-fb="fields" alt=""><div class="txt"><span class="no">4</span><h3>Track and report</h3><p>Watch stock, fix errors and share clear reports.</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== USERS ===================== -->
+<section class="section" id="users">
+  <div class="container">
+    <div class="section-head" data-aos="fade-up">
+      <span class="eyebrow">Who it&rsquo;s for</span>
+      <h2>Built around the people who run the cooperative</h2>
+      <p>Each person sees what they need to do their job well.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3" data-aos="fade-up"><div class="user-card"><div class="avatar av1"><span>CA</span><img data-img="user1" alt="Cooperative administrator"></div><h3>Cooperative administrator</h3><p>Manages farmer accounts, reviews reports and watches records with errors.</p></div></div>
+      <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="100"><div class="user-card"><div class="avatar av2"><span>SC</span><img data-img="user2" alt="Store clerk"></div><h3>Store clerk</h3><p>Records produce as it arrives and keeps stock levels up to date.</p></div></div>
+      <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="200"><div class="user-card"><div class="avatar av3"><span>AT</span><img data-img="user3" alt="Accountant or treasurer"></div><h3>Accountant / treasurer</h3><p>Checks every payment matches a verified delivery and receipt.</p></div></div>
+      <div class="col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="300"><div class="user-card"><div class="avatar av4"><span>FM</span><img data-img="user4" alt="Farmer member"></div><h3>Farmer members</h3><p>Benefit from accurate records, correct payments and fewer disputes.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section class="cta">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7" data-aos="fade-right">
+        <h2>Ready to improve your cooperative records?</h2>
+        <p class="mb-0">Log in to the staff dashboard or create an account to get started.</p>
+      </div>
+      <div class="col-lg-5 text-lg-end" data-aos="fade-left">
+        <a href="{% url 'login' %}" class="btn-ct btn-gold me-2">Staff Login</a>
+        <a href="{% url 'register' %}" class="btn-ct-outline">Create Account</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CONTACT ===================== -->
+<section class="section" id="contact">
+  <div class="container">
+    <div class="section-head" data-aos="fade-up">
+      <span class="eyebrow">Contact us</span>
+      <h2>Let&rsquo;s talk about your cooperative</h2>
+      <p>Send a message and we will get back to you. You can also call or WhatsApp us.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-lg-5" data-aos="fade-right">
+        <div class="contact-card">
+          <h3>Get in touch</h3>
+          <ul>
+            <li><span class="c-icon"><i class="bi bi-telephone-fill"></i></span><div><small>Call us</small><a href="tel:+254715263858">+254 715 263 858</a></div></li>
+            <li><span class="c-icon"><i class="bi bi-whatsapp"></i></span><div><small>WhatsApp</small><a href="https://wa.me/254715263858" target="_blank" rel="noopener">Chat on WhatsApp</a></div></li>
+            <li><span class="c-icon"><i class="bi bi-envelope-fill"></i></span><div><small>Work email</small><a href="mailto:{{ contact_email }}">{{ contact_email }}</a></div></li>
+            <li><span class="c-icon"><i class="bi bi-geo-alt-fill"></i></span><div><small>Based in</small><span class="val">Kenya</span></div></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-7" data-aos="fade-left">
+        <form class="contact-form" method="post" action="{% url 'contact_submit' %}">
+          {% csrf_token %}
+          {% for message in messages %}
+            {% if 'contact' in message.tags %}
+              <div class="form-alert {% if message.level_tag == 'success' %}ok{% else %}bad{% endif %}" role="alert">
+                <i class="bi {% if message.level_tag == 'success' %}bi-check-circle-fill{% else %}bi-exclamation-circle-fill{% endif %}"></i>
+                {{ message }}
+              </div>
+            {% endif %}
+          {% endfor %}
+          <div class="row g-3">
+            <div class="col-md-6"><label for="cName">Your name</label><input type="text" id="cName" name="name" class="form-control" placeholder="e.g. Jane Wanjiru" maxlength="100" required></div>
+            <div class="col-md-6"><label for="cEmail">Email</label><input type="email" id="cEmail" name="email" class="form-control" placeholder="you@example.com" maxlength="254" required></div>
+            <div class="col-12"><label for="cPhone">Phone <span>(optional)</span></label><input type="tel" id="cPhone" name="phone" class="form-control" placeholder="+254 ..." maxlength="30"></div>
+            <div class="col-12"><label for="cMessage">Message</label><textarea id="cMessage" name="message" rows="5" class="form-control" placeholder="Tell us about your cooperative and what you need..." maxlength="2000" required></textarea></div>
+            <div class="hp-field" aria-hidden="true"><label for="cWebsite">Website</label><input type="text" id="cWebsite" name="website" tabindex="-1" autocomplete="off"></div>
+            <div class="col-12"><button type="submit" class="btn-ct w-100 justify-content-center"><i class="bi bi-send-fill"></i> Send message</button></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="kente"></div>
+  <div class="container">
+    <div class="row g-4 foot-main">
+      <div class="col-lg-5">
+        <a class="navbar-brand" href="{% url 'landing' %}" style="display:flex;align-items:center;gap:10px;font-family:'Outfit',sans-serif;font-weight:800;font-size:1.6rem;color:#fff">
+          <span class="brand-mark"><i class="bi bi-flower2"></i></span><span class="brand-name">Coop<span>Track</span></span>
+        </a>
+        <p class="mt-3" style="max-width:400px">Digital tracking for farming cooperatives. Accurate records, correct payments and stock you can trust.</p>
+      </div>
+      <div class="col-6 col-lg-3">
+        <h5>Explore</h5>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#users">Users</a></li>
+          <li><a href="{% url 'login' %}">Staff login</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-4">
+        <h5>Contact</h5>
+        <ul>
+          <li><a href="tel:+254715263858"><i class="bi bi-telephone"></i>+254 715 263 858</a></li>
+          <li><a href="https://wa.me/254715263858" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i>WhatsApp</a></li>
+          <li><a href="mailto:{{ contact_email }}"><i class="bi bi-envelope"></i>{{ contact_email }}</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom"><span>&copy; 2026 CoopTrack. All rights reserved.</span><span>Made in Kenya</span></div>
+  </div>
+</footer>
+
+<a href="#home" class="to-top" id="toTop" aria-label="Back to top"><i class="bi bi-arrow-up"></i></a>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ==========================================================
+     PICTURES  -  change the photos HERE, in one place.
+     How to use an Unsplash photo:
+       1. Open the photo on unsplash.com
+       2. Right-click the photo > "Copy image address"
+          (it starts with https://images.unsplash.com/...)
+       3. Paste it between the quotes below.
+     Leave a line as '' to show the built-in African illustration.
+     ========================================================== */
+  var IMAGES = {
+    hero1: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1800&q=80',
+    hero2: 'https://images.unsplash.com/photo-1500937386664-56d1dfef292d?auto=format&fit=crop&w=1800&q=80',
+    hero3: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1800&q=80',
+    about: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=900&q=80',
+    spot:  '',
+    step1: '',
+    step2: '',
+    step3: '',
+    step4: '',
+    user1: '',   /* Cooperative administrator  (e.g. a Black woman)  */
+    user2: '',   /* Store clerk                (e.g. a Black man)    */
+    user3: '',   /* Accountant / treasurer     (e.g. a white woman)  */
+    user4: ''    /* Farmer member              (e.g. a white man)    */
+  };
+
+  /* ---------- built-in illustrations (used when a photo is empty or fails to load) ---------- */
+  var ART = {
+    sunset: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbe7b8"/><stop offset=".5" stop-color="#f4b25f"/><stop offset="1" stop-color="#d9653b"/></linearGradient><radialGradient id="g"><stop offset="0" stop-color="#fffbe8" stop-opacity=".95"/><stop offset="1" stop-color="#fff1c1" stop-opacity="0"/></radialGradient></defs><rect width="1200" height="800" fill="url(#a)"/><circle cx="600" cy="400" r="260" fill="url(#g)"/><circle cx="600" cy="400" r="86" fill="#fff4c9"/><path d="M0 500C200 450 380 480 560 495S900 465 1200 490V800H0z" fill="#b9512f" opacity=".55"/><path d="M0 560C240 515 420 545 640 560S980 530 1200 548V800H0z" fill="#2c6a4a"/><path d="M0 630C260 590 460 625 700 635S1020 610 1200 622V800H0z" fill="#17513a"/><g fill="#082a1e"><path d="M900 640c-3-40 0-75 6-112l-36-40 24 8 14 18 7-30 9 30 16-26-7 34 31-17-33 36c3 36 4 72 9 109z"/><ellipse cx="905" cy="510" rx="140" ry="24"/><ellipse cx="835" cy="524" rx="78" ry="17"/><ellipse cx="978" cy="522" rx="72" ry="16"/><path d="M230 650c-2-26 0-48 4-72l-24-24 17 5 9 12 5-22 6 22 12-18-5 24 22-12-23 25c2 24 3 48 6 72z"/><ellipse cx="238" cy="566" rx="84" ry="15"/><ellipse cx="190" cy="576" rx="46" ry="10"/></g></svg>',
+    fields: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe3d0"/><stop offset="1" stop-color="#f6efd2"/></linearGradient></defs><rect width="1200" height="800" fill="url(#s)"/><circle cx="880" cy="230" r="70" fill="#fff6c9"/><path d="M0 430C200 380 420 420 640 405S1000 380 1200 410V800H0z" fill="#6fae7e"/><path d="M0 470C240 430 460 465 700 455S1020 430 1200 455V800H0z" fill="#3f8f5e"/><path d="M0 520h1200V800H0z" fill="#2b7a4b"/><g stroke="#8fd19e" stroke-width="5" stroke-linecap="round" opacity=".7"><path d="M600 520L60 800"/><path d="M600 520L240 800"/><path d="M600 520L420 800"/><path d="M600 520L600 800"/><path d="M600 520L780 800"/><path d="M600 520L960 800"/><path d="M600 520L1140 800"/></g></svg>',
+    kente: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"><defs><pattern id="p" width="80" height="40" patternUnits="userSpaceOnUse"><rect width="80" height="40" fill="#0b3a1f"/><path d="M0 40L20 0l20 40L60 0l20 40z" fill="#f2b134"/><path d="M0 40L20 12l20 28L60 12l20 28z" fill="#c4552f"/><path d="M0 40L20 24l20 16L60 24l20 16z" fill="#22a05a"/></pattern><radialGradient id="r"><stop offset="0" stop-color="#f2b134" stop-opacity=".9"/><stop offset="1" stop-color="#f2b134" stop-opacity="0"/></radialGradient></defs><rect width="1200" height="800" fill="#0b3a1f"/><rect y="0" width="1200" height="40" fill="url(#p)"/><rect y="760" width="1200" height="40" fill="url(#p)"/><circle cx="600" cy="400" r="300" fill="url(#r)"/><circle cx="600" cy="400" r="120" fill="#f2b134"/><circle cx="600" cy="400" r="84" fill="#0b3a1f"/><circle cx="600" cy="400" r="44" fill="#c4552f"/></svg>'
+  };
+  function art(type) { return 'data:image/svg+xml;utf8,' + encodeURIComponent(ART[type] || ART.sunset); }
+
+  /* ---------- put the pictures on the page ---------- */
+  document.querySelectorAll('img[data-img]').forEach(function (img) {
+    var key = img.getAttribute('data-img');
+    var url = IMAGES[key];
+    var isAvatar = /^user/.test(key);
+    if (isAvatar) {
+      if (!url) return;                           /* keep the coloured initials */
+      img.addEventListener('load', function () { img.parentNode.classList.add('has-photo'); });
+      img.addEventListener('error', function () { img.remove(); });
+      img.src = url;
+      return;
+    }
+    var fb = art(img.getAttribute('data-fb'));
+    img.addEventListener('error', function () { if (img.src !== fb) img.src = fb; });
+    img.src = url || fb;
+  });
+
+  /* ---------- animations ---------- */
+  if (window.AOS) { AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true, offset: 60 }); }
+
+  /* ---------- header + back-to-top ---------- */
+  var nav = document.getElementById('siteNav'), top = document.getElementById('toTop');
+  function onScroll() {
+    var y = window.scrollY || document.documentElement.scrollTop;
+    nav.classList.toggle('scrolled', y > 40);
+    top.classList.toggle('show', y > 600);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* close the phone menu after tapping a link */
+  document.querySelectorAll('#navMenu a').forEach(function (a) {
+    a.addEventListener('click', function () {
+      var m = document.getElementById('navMenu');
+      if (m.classList.contains('show')) { bootstrap.Collapse.getOrCreateInstance(m).hide(); }
+    });
+  });
+
+  /* after sending the contact form, scroll back to it */
+  if (location.hash === '#contact') {
+    var c = document.getElementById('contact');
+    if (c) setTimeout(function () { c.scrollIntoView(); }, 60);
+  }
+})();
+</script>
+</body>
+</html>

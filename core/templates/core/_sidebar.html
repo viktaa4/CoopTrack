@@ -1,0 +1,72 @@
+{% with url_name=request.resolver_match.url_name %}
+<div class="sidebar" id="sidebar">
+
+    <div class="sidebar-brand text-center">
+        <button type="button" class="sb-toggle" id="sbToggle" title="Collapse / expand menu" aria-label="Collapse or expand menu">
+            <i class="bi bi-layout-sidebar-inset"></i>
+        </button>
+        <div class="brand-emoji" style="font-size: 30px;">&#127806;</div>
+        <h4 class="font-display mb-0">CoopTrack</h4>
+        <small style="opacity: 0.7; font-size: 12px;">Cooperative System</small>
+    </div>
+
+    <nav class="sb-nav">
+        <a href="{% url 'dashboard' %}" title="Dashboard" {% if url_name == 'dashboard' %}class="active"{% endif %}>
+            <i class="bi bi-grid-1x2"></i> <span>Dashboard</span>
+        </a>
+        <a href="{% url 'farmers' %}" title="Farmers" {% if 'farmer' in url_name %}class="active"{% endif %}>
+            <i class="bi bi-people"></i> <span>Farmers</span>
+        </a>
+        <a href="{% url 'deliveries' %}" title="Deliveries" {% if 'deliver' in url_name %}class="active"{% endif %}>
+            <i class="bi bi-truck"></i> <span>Deliveries</span>
+        </a>
+        <a href="{% url 'payments' %}" title="Payments" {% if 'payment' in url_name %}class="active"{% endif %}>
+            <i class="bi bi-cash-stack"></i> <span>Payments</span>
+        </a>
+        <a href="{% url 'stock' %}" title="Stock" {% if 'stock' in url_name %}class="active"{% endif %}>
+            <i class="bi bi-box-seam"></i> <span>Stock</span>
+        </a>
+        <a href="{% url 'errors' %}" title="Errors" {% if 'error' in url_name %}class="active"{% endif %}>
+            <i class="bi bi-exclamation-triangle"></i> <span>Errors</span>
+        </a>
+        <a href="{% url 'reports' %}" title="Reports" {% if 'report' in url_name %}class="active"{% endif %}>
+            <i class="bi bi-bar-chart-line"></i> <span>Reports</span>
+        </a>
+    </nav>
+
+    <div class="sb-foot">
+        <div class="sidebar-user">
+            <small style="opacity:.7">Signed in as</small>
+            <strong>{{ request.user.username }}</strong>
+        </div>
+        <a href="{% url 'landing' %}" title="Home page">
+            <i class="bi bi-house"></i> <span>Home page</span>
+        </a>
+        <a href="{% url 'logout' %}" title="Logout">
+            <i class="bi bi-box-arrow-left"></i> <span>Logout</span>
+        </a>
+    </div>
+</div>
+
+<script>
+/* Collapse / expand the menu. The choice is remembered. Small screens start collapsed. */
+(function () {
+    var body = document.body, key = 'cooptrack_sidebar';
+    var saved = null;
+    try { saved = localStorage.getItem(key); } catch (e) {}
+    function apply() {
+        var small = window.innerWidth < 1200;
+        var collapsed = saved === null ? small : saved === 'collapsed';
+        if (window.innerWidth < 992) collapsed = true;
+        body.classList.toggle('sb-collapsed', collapsed);
+    }
+    apply();
+    window.addEventListener('resize', apply);
+    document.getElementById('sbToggle').addEventListener('click', function () {
+        saved = body.classList.contains('sb-collapsed') ? 'expanded' : 'collapsed';
+        try { localStorage.setItem(key, saved); } catch (e) {}
+        apply();
+    });
+})();
+</script>
+{% endwith %}

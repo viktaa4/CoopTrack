@@ -1,0 +1,55 @@
+{% extends 'core/base.html' %}
+{% load coop_extras %}
+{% block title %}Payments - CoopTrack{% endblock %}
+{% block content %}
+{% include 'core/_sidebar.html' %}
+<div class="main">
+{% include 'core/_flash.html' %}
+
+<div class="page-banner fade-in">
+    <div><h1 class="font-display">Payments</h1><p>Track farmer payments and catch mismatches early</p></div>
+    <a href="{% url 'payment_add' %}" class="btn-gold no-print"><i class="bi bi-plus-lg"></i> Add payment</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="stat-card"><small class="text-muted">Total paid</small><div class="stat-num" style="color:#166534">KES {{ total_paid|floatformat:"0g" }}</div></div></div>
+    <div class="col-md-4"><div class="stat-card"><small class="text-muted">Not yet paid</small><div class="stat-num" style="color:#d97706">KES {{ total_pending|floatformat:"0g" }}</div></div></div>
+    <div class="col-md-4"><div class="stat-card"><small class="text-muted">Verified deliveries with no payment</small><div class="stat-num text-primary">{{ unpaid_deliveries }}</div></div></div>
+</div>
+
+<div class="content-card fade-in">
+    <form method="get" class="row g-2 mb-4 no-print">
+        <div class="col-md-4"><select name="status" class="form-select"><option value="">All payments</option>
+            {% for s in statuses %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+        <div class="col-md-4 d-flex gap-2"><button class="btn btn-green px-4"><i class="bi bi-funnel"></i> Filter</button>
+            {% if status %}<a href="{% url 'payments' %}" class="btn-soft">Clear</a>{% endif %}</div>
+    </form>
+    {% if payments %}
+    <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+        <thead><tr><th>ID</th><th>Farmer</th><th>Delivery</th><th>Amount</th><th>Receipt</th><th>Date</th><th>Status</th><th class="text-end no-print">Actions</th></tr></thead>
+        <tbody>
+        {% for p in payments %}
+        <tr>
+            <td class="fw-semibold">{{ p.code }}</td><td>{{ p.farmer.name }}</td><td>{{ p.delivery.code }}</td>
+            <td>KES {{ p.amount|floatformat:"2g" }}</td><td>{{ p.receipt_no }}</td><td>{{ p.payment_date|date:"d M Y" }}</td>
+            <td><span class="{{ p.status|badge }}">{{ p.status }}</span></td>
+            <td class="text-end text-nowrap no-print">
+                {% if p.status != 'Paid' %}
+                <form method="post" action="{% url 'payment_paid' p.pk %}" class="d-inline">{% csrf_token %}
+                    <button type="submit" class="icon-btn ok" title="Mark as paid"><i class="bi bi-check2-circle"></i></button></form>
+                {% endif %}
+                <a href="{% url 'payment_edit' p.pk %}" class="icon-btn" title="Edit"><i class="bi bi-pencil"></i></a>
+                <form method="post" action="{% url 'payment_delete' p.pk %}" class="d-inline" onsubmit="return confirm('Delete payment {{ p.code }}?')">{% csrf_token %}
+                    <button type="submit" class="icon-btn danger" title="Delete"><i class="bi bi-trash"></i></button></form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody></table></div>
+    {% else %}
+    <div class="empty-state"><i class="bi bi-cash-stack"></i>{% if status %}No payments with that status.{% else %}No payments recorded yet.{% endif %}
+        <br>Verify a delivery first, then add its payment.<br><a href="{% url 'payment_add' %}" class="btn-soft mt-3">Add a payment</a></div>
+    {% endif %}
+</div>
+
+</div>
+{% endblock %}

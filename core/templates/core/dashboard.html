@@ -1,0 +1,107 @@
+{% extends 'core/base.html' %}
+{% load coop_extras %}
+{% block title %}Dashboard - CoopTrack{% endblock %}
+{% block content %}
+{% include 'core/_sidebar.html' %}
+<div class="main">
+{% include 'core/_flash.html' %}
+
+<div class="page-banner fade-in">
+    <div>
+        <h1 class="font-display">Welcome back, {{ request.user.username }}</h1>
+        <p>Here is an overview of your cooperative today.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap no-print">
+        <a href="{% url 'delivery_add' %}" class="btn-gold"><i class="bi bi-plus-lg"></i> Record delivery</a>
+        <a href="{% url 'farmer_add' %}" class="btn-soft"><i class="bi bi-person-plus"></i> Add farmer</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3"><a class="stat-link" href="{% url 'farmers' %}"><div class="stat-card fade-in">
+        <div class="d-flex justify-content-between align-items-center"><div><div class="stat-num text-success">{{ farmer_count }}</div><small class="text-muted">Registered farmers</small></div>
+        <div class="stat-icon" style="background:#dcfce7;color:#166534"><i class="bi bi-people-fill"></i></div></div></div></a></div>
+    <div class="col-6 col-xl-3"><a class="stat-link" href="{% url 'deliveries' %}"><div class="stat-card fade-in" style="animation-delay:.05s">
+        <div class="d-flex justify-content-between align-items-center"><div><div class="stat-num" style="color:#2563eb">{{ today_deliveries }}</div><small class="text-muted">Today's deliveries</small></div>
+        <div class="stat-icon" style="background:#dbeafe;color:#2563eb"><i class="bi bi-truck"></i></div></div></div></a></div>
+    <div class="col-6 col-xl-3"><a class="stat-link" href="{% url 'payments' %}"><div class="stat-card fade-in" style="animation-delay:.1s">
+        <div class="d-flex justify-content-between align-items-center"><div><div class="stat-num" style="color:#d97706">{{ pending_payments }}</div><small class="text-muted">Pending payments</small></div>
+        <div class="stat-icon" style="background:#fef3c7;color:#d97706"><i class="bi bi-cash-stack"></i></div></div></div></a></div>
+    <div class="col-6 col-xl-3"><a class="stat-link" href="{% url 'errors' %}"><div class="stat-card fade-in" style="animation-delay:.15s">
+        <div class="d-flex justify-content-between align-items-center"><div><div class="stat-num text-danger">{{ error_count }}</div><small class="text-muted">Records with errors</small></div>
+        <div class="stat-icon" style="background:#fee2e2;color:#dc2626"><i class="bi bi-exclamation-triangle-fill"></i></div></div></div></a></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="content-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Recent deliveries</h5>
+                <a href="{% url 'deliveries' %}" class="btn-soft">View all</a>
+            </div>
+            {% if recent_deliveries %}
+            <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+                <thead><tr><th>ID</th><th>Farmer</th><th>Produce</th><th>Quantity</th><th>Status</th></tr></thead>
+                <tbody>
+                {% for d in recent_deliveries %}
+                <tr><td class="fw-semibold">{{ d.code }}</td><td>{{ d.farmer.name }}</td><td>{{ d.produce }}</td>
+                    <td>{{ d.quantity|floatformat:"-2g" }} kg</td><td><span class="{{ d.status|badge }}">{{ d.status }}</span></td></tr>
+                {% endfor %}
+                </tbody></table></div>
+            {% else %}
+            <div class="empty-state"><i class="bi bi-truck"></i>No deliveries yet.<br><a href="{% url 'delivery_add' %}" class="btn-soft mt-3">Record the first delivery</a></div>
+            {% endif %}
+        </div>
+
+        <div class="content-card">
+            <h5 class="fw-bold mb-3">Stock overview</h5>
+            {% for s in stocks %}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between"><strong>{{ s.produce }}</strong>
+                    <span class="text-muted">{{ s.available|floatformat:"-2g" }} kg available <span class="{{ s.status|badge }} ms-2">{{ s.status }}</span></span></div>
+                <div class="bar mt-1 {% if s.available < 0 %}red{% endif %}"><span style="width: {{ s.pct }}%"></span></div>
+            </div>
+            {% empty %}
+            <div class="empty-state"><i class="bi bi-box-seam"></i>Stock appears here once deliveries are verified.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="content-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Needs attention</h5>
+                <a href="{% url 'errors' %}" class="btn-soft">Errors</a>
+            </div>
+            {% for e in open_errors %}
+            <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
+                <i class="bi bi-exclamation-triangle-fill text-danger mt-1"></i>
+                <div><strong>{{ e.title }}</strong> <span class="b-grey">{{ e.related_record }}</span>
+                    <div class="text-muted small">{{ e.description }}</div></div>
+            </div>
+            {% empty %}
+            <div class="empty-state py-4"><i class="bi bi-patch-check"></i>No open errors. Great work!</div>
+            {% endfor %}
+        </div>
+
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Recent activity {% if unread %}<span class="b-amber ms-1">{{ unread }} new</span>{% endif %}</h5>
+                {% if unread %}
+                <form method="post" action="{% url 'notifications_read' %}">{% csrf_token %}<button class="btn-soft" type="submit">Mark read</button></form>
+                {% endif %}
+            </div>
+            {% for n in activity %}
+            <div class="d-flex gap-3 mb-3">
+                <span class="activity-dot {% if not n.is_read %}unread{% endif %}"></span>
+                <div><div>{{ n.message }}</div><small class="text-muted">{{ n.created_at|timesince }} ago</small></div>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0">Your actions will appear here.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+</div>
+{% endblock %}

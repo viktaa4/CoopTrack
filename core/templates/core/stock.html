@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+{% load coop_extras %}
+{% block title %}Stock - CoopTrack{% endblock %}
+{% block content %}
+{% include 'core/_sidebar.html' %}
+<div class="main">
+{% include 'core/_flash.html' %}
+
+<div class="page-banner fade-in">
+    <div><h1 class="font-display">Stock</h1><p>Produce received, dispatched and available in the store</p></div>
+    <div class="d-flex gap-2 no-print">
+        <a href="{% url 'report_export' 'stock' %}" class="btn-soft"><i class="bi bi-download"></i> Export CSV</a>
+        <form method="post" action="{% url 'stock_recalc' %}">{% csrf_token %}<button class="btn-gold" type="submit"><i class="bi bi-arrow-repeat"></i> Recalculate</button></form>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8"><div class="content-card">
+        <h5 class="fw-bold mb-3">Stock levels</h5>
+        {% if stocks %}
+        <div class="table-responsive"><table class="table align-middle mb-0">
+            <thead><tr><th>Produce</th><th>Received</th><th>Dispatched</th><th>Available</th><th style="width:22%">Level</th><th>Status</th></tr></thead><tbody>
+            {% for s in stocks %}
+            <tr><td class="fw-semibold">{{ s.produce }}</td><td>{{ s.received|floatformat:"-2g" }} kg</td><td>{{ s.dispatched|floatformat:"-2g" }} kg</td>
+                <td class="fw-bold {% if s.available < 0 %}text-danger{% endif %}">{{ s.available|floatformat:"-2g" }} kg</td>
+                <td><div class="bar {% if s.available < 0 %}red{% endif %}"><span style="width: {{ s.pct }}%"></span></div></td>
+                <td><span class="{{ s.status|badge }}">{{ s.status }}</span></td></tr>
+            {% endfor %}
+            </tbody></table></div>
+        <p class="text-muted small mt-3 mb-0">Received counts only <strong>verified</strong> deliveries. Available = received &minus; dispatched.</p>
+        {% else %}
+        <div class="empty-state"><i class="bi bi-box-seam"></i>No stock yet. Verify a delivery and it will appear here.<br><a href="{% url 'deliveries' %}" class="btn-soft mt-3">Go to deliveries</a></div>
+        {% endif %}
+    </div></div>
+
+    <div class="col-xl-4"><div class="content-card">
+        <h5 class="fw-bold mb-3">Record dispatch</h5>
+        {% if stocks %}
+        <form method="post" action="{% url 'stock_dispatch' %}">{% csrf_token %}
+            <label class="form-label fw-semibold">{{ dispatch_form.produce.label }}</label>{{ dispatch_form.produce }}
+            <label class="form-label fw-semibold mt-3">{{ dispatch_form.quantity.label }}</label>{{ dispatch_form.quantity }}
+            <button class="btn btn-green w-100 mt-4" type="submit"><i class="bi bi-box-arrow-up"></i> Record dispatch</button>
+        </form>
+        <p class="text-muted small mt-3 mb-0">If you dispatch more than is available, the system flags a stock mismatch.</p>
+        {% else %}<p class="text-muted mb-0">Dispatch becomes available once there is stock.</p>{% endif %}
+    </div></div>
+</div>
+
+</div>
+{% endblock %}

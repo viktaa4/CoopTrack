@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+{% load coop_extras %}
+{% block title %}Farmers - CoopTrack{% endblock %}
+{% block content %}
+{% include 'core/_sidebar.html' %}
+<div class="main">
+{% include 'core/_flash.html' %}
+
+<div class="page-banner fade-in">
+    <div><h1 class="font-display">Farmers</h1><p>Manage registered farmers and their produce information</p></div>
+    <a href="{% url 'farmer_add' %}" class="btn-gold no-print"><i class="bi bi-person-plus"></i> Add farmer</a>
+</div>
+
+<div class="content-card fade-in">
+    <form method="get" class="row g-2 mb-4 no-print">
+        <div class="col-md-6"><input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Search by name, phone or produce..."></div>
+        <div class="col-md-3"><select name="status" class="form-select"><option value="">All statuses</option>
+            {% for s in statuses %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+        <div class="col-md-3 d-flex gap-2"><button class="btn btn-green px-4"><i class="bi bi-search"></i> Search</button>
+            {% if q or status %}<a href="{% url 'farmers' %}" class="btn-soft">Clear</a>{% endif %}</div>
+    </form>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Registered farmers <span class="text-muted fw-normal">({{ farmers|length }}{% if q or status %} of {{ total }}{% endif %})</span></h5>
+    </div>
+    {% if farmers %}
+    <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+        <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Main produce</th><th>Deliveries</th><th>Status</th><th class="text-end no-print">Actions</th></tr></thead>
+        <tbody>
+        {% for f in farmers %}
+        <tr>
+            <td class="fw-semibold">{{ f.code }}</td>
+            <td><a href="{% url 'farmer_detail' f.pk %}" class="text-decoration-none fw-semibold" style="color:#166534">{{ f.name }}</a></td>
+            <td>{{ f.phone }}</td><td>{{ f.produce_type }}</td><td>{{ f.delivery_count }}</td>
+            <td><span class="{{ f.status|badge }}">{{ f.status }}</span></td>
+            <td class="text-end text-nowrap no-print">
+                <a href="{% url 'farmer_detail' f.pk %}" class="icon-btn" title="View"><i class="bi bi-eye"></i></a>
+                <a href="{% url 'farmer_edit' f.pk %}" class="icon-btn" title="Edit"><i class="bi bi-pencil"></i></a>
+                <form method="post" action="{% url 'farmer_delete' f.pk %}" class="d-inline" onsubmit="return confirm('Delete {{ f.name|escapejs }}? Their deliveries and payments will be deleted too.')">{% csrf_token %}
+                    <button type="submit" class="icon-btn danger" title="Delete"><i class="bi bi-trash"></i></button></form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody></table></div>
+    {% else %}
+    <div class="empty-state"><i class="bi bi-people"></i>{% if q or status %}No farmers match your search.{% else %}No farmers registered yet.{% endif %}
+        <br><a href="{% url 'farmer_add' %}" class="btn-soft mt-3">Register a farmer</a></div>
+    {% endif %}
+</div>
+
+</div>
+{% endblock %}

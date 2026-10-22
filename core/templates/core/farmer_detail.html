@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+{% load coop_extras %}
+{% block title %}Farmer - CoopTrack{% endblock %}
+{% block content %}
+{% include 'core/_sidebar.html' %}
+<div class="main">
+{% include 'core/_flash.html' %}
+
+<div class="page-banner fade-in">
+    <div><h1 class="font-display">{{ farmer.name }}</h1><p>{{ farmer.code }} &middot; {{ farmer.produce_type }} &middot; {{ farmer.phone }}</p></div>
+    <div class="d-flex gap-2 no-print">
+        <a href="{% url 'farmer_edit' farmer.pk %}" class="btn-gold"><i class="bi bi-pencil"></i> Edit</a>
+        <a href="{% url 'farmers' %}" class="btn-soft">Back</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="stat-card"><small class="text-muted">Status</small><div class="mt-1"><span class="{{ farmer.status|badge }}">{{ farmer.status }}</span></div></div></div>
+    <div class="col-md-3"><div class="stat-card"><small class="text-muted">Verified produce</small><div class="stat-num text-success">{{ total_kg|floatformat:"-2g" }} kg</div></div></div>
+    <div class="col-md-3"><div class="stat-card"><small class="text-muted">Total paid</small><div class="stat-num" style="color:#166534">KES {{ total_paid|floatformat:"0g" }}</div></div></div>
+    <div class="col-md-3"><div class="stat-card"><small class="text-muted">Payments pending</small><div class="stat-num" style="color:#d97706">KES {{ total_pending|floatformat:"0g" }}</div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-7"><div class="content-card">
+        <div class="d-flex justify-content-between mb-3"><h5 class="fw-bold mb-0">Deliveries</h5>
+            <a href="{% url 'delivery_add' %}?farmer={{ farmer.pk }}" class="btn-soft no-print"><i class="bi bi-plus-lg"></i> Record</a></div>
+        {% if deliveries %}<div class="table-responsive"><table class="table align-middle mb-0">
+            <thead><tr><th>ID</th><th>Produce</th><th>Qty</th><th>Date</th><th>Status</th></tr></thead><tbody>
+            {% for d in deliveries %}<tr><td>{{ d.code }}</td><td>{{ d.produce }}</td><td>{{ d.quantity|floatformat:"-2g" }} kg</td><td>{{ d.delivery_date|date:"d M Y" }}</td><td><span class="{{ d.status|badge }}">{{ d.status }}</span></td></tr>{% endfor %}
+            </tbody></table></div>
+        {% else %}<p class="text-muted mb-0">No deliveries yet.</p>{% endif %}
+    </div></div>
+    <div class="col-xl-5"><div class="content-card">
+        <h5 class="fw-bold mb-3">Payments</h5>
+        {% if payments %}<div class="table-responsive"><table class="table align-middle mb-0">
+            <thead><tr><th>ID</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+            {% for p in payments %}<tr><td>{{ p.code }}<div class="small text-muted">{{ p.delivery.code }}</div></td><td>KES {{ p.amount|floatformat:"0g" }}</td><td><span class="{{ p.status|badge }}">{{ p.status }}</span></td></tr>{% endfor %}
+            </tbody></table></div>
+        {% else %}<p class="text-muted mb-0">No payments yet.</p>{% endif %}
+    </div></div>
+</div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'core/base.html' %}
+{% load coop_extras %}
+{% block title %}Errors - CoopTrack{% endblock %}
+{% block content %}
+{% include 'core/_sidebar.html' %}
+<div class="main">
+{% include 'core/_flash.html' %}
+
+<div class="page-banner fade-in">
+    <div><h1 class="font-display">Error tracking</h1><p>Wrong details, mismatches and late records found in your data</p></div>
+    <div class="d-flex gap-2 no-print">
+        <a href="{% url 'report_export' 'errors' %}" class="btn-soft"><i class="bi bi-download"></i> Export CSV</a>
+        <form method="post" action="{% url 'errors_scan' %}">{% csrf_token %}<button class="btn-gold" type="submit"><i class="bi bi-search"></i> Run scan</button></form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><a class="stat-link" href="{% url 'errors' %}?status=Requires Correction"><div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center"><div><div class="stat-num text-danger">{{ n_require }}</div><small class="text-muted">Requires correction</small></div>
+        <div class="stat-icon" style="background:#fee2e2;color:#dc2626"><i class="bi bi-exclamation-octagon"></i></div></div></div></a></div>
+    <div class="col-md-4"><a class="stat-link" href="{% url 'errors' %}?status=Under Review"><div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center"><div><div class="stat-num" style="color:#d97706">{{ n_review }}</div><small class="text-muted">Under review</small></div>
+        <div class="stat-icon" style="background:#fef3c7;color:#d97706"><i class="bi bi-hourglass-split"></i></div></div></div></a></div>
+    <div class="col-md-4"><a class="stat-link" href="{% url 'errors' %}?status=Corrected"><div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center"><div><div class="stat-num text-success">{{ n_fixed }}</div><small class="text-muted">Corrected</small></div>
+        <div class="stat-icon" style="background:#dcfce7;color:#166534"><i class="bi bi-patch-check"></i></div></div></div></a></div>
+</div>
+
+<div class="content-card fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="fw-bold mb-0">{% if status %}{{ status }}{% else %}All errors{% endif %}</h5>
+        {% if status %}<a href="{% url 'errors' %}" class="btn-soft no-print">Show all</a>{% endif %}
+    </div>
+    {% if errors %}
+    <div class="table-responsive"><table class="table align-middle mb-0">
+        <thead><tr><th>Error</th><th>What is wrong</th><th>Record</th><th>Found</th><th>Status</th><th class="no-print">Change status</th></tr></thead>
+        <tbody>
+        {% for e in errors %}
+        <tr>
+            <td class="fw-semibold">{{ e.title }}</td>
+            <td style="max-width:360px" class="text-muted small">{{ e.description }}</td>
+            <td><span class="b-grey">{{ e.related_record }}</span></td>
+            <td class="text-nowrap">{{ e.detected_date|date:"d M Y" }}</td>
+            <td><span class="{{ e.status|badge }}">{{ e.status }}</span></td>
+            <td class="no-print">
+                <form method="post" action="{% url 'error_status' e.pk %}" class="d-flex gap-1">{% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <select name="status" class="form-select form-select-sm" style="min-width:150px;padding:6px 10px">
+                        {% for s in statuses %}<option value="{{ s }}" {% if s == e.status %}selected{% endif %}>{{ s }}</option>{% endfor %}
+                    </select>
+                    <button type="submit" class="icon-btn ok" title="Save"><i class="bi bi-check-lg"></i></button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody></table></div>
+    {% else %}
+    <div class="empty-state"><i class="bi bi-patch-check"></i>{% if status %}No errors with this status.{% else %}No errors found. Your records look correct.{% endif %}
+        <br><small>The system re-checks your data every time you save a record. You can also press Run scan.</small></div>
+    {% endif %}
+</div>
+
+</div>
+{% endblock %}

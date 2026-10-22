@@ -1,0 +1,15 @@
+CoopTrack - Farming Cooperative Tracking System
+
+Requirements: Python 3.10+
+
+Setup:
+1. python -m venv venv
+2. venv\Scripts\activate          (Windows)
+   source venv/bin/activate       (Mac/Linux)
+3. pip install -r requirements.txt
+4. python manage.py migrate
+5. python manage.py createsuperuser
+6. python manage.py runserver
+
+Open: http://127.0.0.1:8000/
+Admin: http://127.0.0.1:8000/admin/

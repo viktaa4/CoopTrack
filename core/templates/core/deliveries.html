@@ -1,0 +1,54 @@
+{% extends 'core/base.html' %}
+{% load coop_extras %}
+{% block title %}Deliveries - CoopTrack{% endblock %}
+{% block content %}
+{% include 'core/_sidebar.html' %}
+<div class="main">
+{% include 'core/_flash.html' %}
+
+<div class="page-banner fade-in">
+    <div><h1 class="font-display">Deliveries</h1><p>Record produce deliveries, verify them and add them to stock</p></div>
+    <a href="{% url 'delivery_add' %}" class="btn-gold no-print"><i class="bi bi-plus-lg"></i> Record delivery</a>
+</div>
+
+<div class="content-card fade-in">
+    <form method="get" class="row g-2 mb-4 no-print">
+        <div class="col-md-6"><input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Search farmer, produce or receipt..."></div>
+        <div class="col-md-3"><select name="status" class="form-select"><option value="">All statuses</option>
+            {% for s in statuses %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+        <div class="col-md-3 d-flex gap-2"><button class="btn btn-green px-4"><i class="bi bi-funnel"></i> Filter</button>
+            {% if q or status %}<a href="{% url 'deliveries' %}" class="btn-soft">Clear</a>{% endif %}</div>
+    </form>
+
+    {% if deliveries %}
+    <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+        <thead><tr><th>ID</th><th>Farmer</th><th>Produce</th><th>Quantity</th><th>Receipt</th><th>Date</th><th>Status</th><th class="text-end no-print">Actions</th></tr></thead>
+        <tbody>
+        {% for d in deliveries %}
+        <tr>
+            <td class="fw-semibold">{{ d.code }}</td><td>{{ d.farmer.name }}</td><td>{{ d.produce }}</td>
+            <td>{{ d.quantity|floatformat:"-2g" }} kg</td><td>{{ d.receipt_no }}</td><td>{{ d.delivery_date|date:"d M Y" }}</td>
+            <td><span class="{{ d.status|badge }}">{{ d.status }}</span></td>
+            <td class="text-end text-nowrap no-print">
+                {% if d.status != 'Verified' %}
+                <form method="post" action="{% url 'delivery_verify' d.pk %}" class="d-inline">{% csrf_token %}
+                    <button type="submit" class="icon-btn ok" title="Verify delivery"><i class="bi bi-check2-circle"></i></button></form>
+                {% elif not d.has_payment %}
+                <a href="{% url 'payment_add' %}?delivery={{ d.pk }}" class="icon-btn ok" title="Add payment"><i class="bi bi-cash-coin"></i></a>
+                {% endif %}
+                <a href="{% url 'delivery_edit' d.pk %}" class="icon-btn" title="Edit"><i class="bi bi-pencil"></i></a>
+                <form method="post" action="{% url 'delivery_delete' d.pk %}" class="d-inline" onsubmit="return confirm('Delete delivery {{ d.code }}? Its payment (if any) will be deleted too.')">{% csrf_token %}
+                    <button type="submit" class="icon-btn danger" title="Delete"><i class="bi bi-trash"></i></button></form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody></table></div>
+    {% else %}
+    <div class="empty-state"><i class="bi bi-truck"></i>{% if q or status %}No deliveries match your filter.{% else %}No deliveries recorded yet.{% endif %}
+        {% if farmer_count %}<br><a href="{% url 'delivery_add' %}" class="btn-soft mt-3">Record a delivery</a>
+        {% else %}<br>Register a farmer first.<br><a href="{% url 'farmer_add' %}" class="btn-soft mt-3">Add a farmer</a>{% endif %}</div>
+    {% endif %}
+</div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+{% load coop_extras %}
+{% block title %}Reports - CoopTrack{% endblock %}
+{% block content %}
+{% include 'core/_sidebar.html' %}
+<div class="main">
+{% include 'core/_flash.html' %}
+
+<div class="page-banner fade-in">
+    <div><h1 class="font-display">Reports</h1><p>Farmers, deliveries, payments and errors at a glance</p></div>
+    <div class="d-flex gap-2 flex-wrap no-print">
+        <button onclick="window.print()" class="btn-gold" type="button"><i class="bi bi-printer"></i> Print report</button>
+    </div>
+</div>
+
+<div class="content-card mb-4 no-print">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3"><label class="form-label fw-semibold small">From date</label><input type="date" name="date_from" class="form-control" value="{{ f.date_from|date:'Y-m-d' }}"></div>
+        <div class="col-md-3"><label class="form-label fw-semibold small">To date</label><input type="date" name="date_to" class="form-control" value="{{ f.date_to|date:'Y-m-d' }}"></div>
+        <div class="col-md-3"><label class="form-label fw-semibold small">Produce</label>
+            <select name="produce" class="form-select"><option value="">All produce</option>
+                {% for p in produce_options %}<option value="{{ p }}" {% if p == f.produce %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></div>
+        <div class="col-md-3 d-flex gap-2"><button class="btn btn-green px-4"><i class="bi bi-funnel"></i> Apply</button>
+            <a href="{% url 'reports' %}" class="btn-soft">Reset</a></div>
+    </form>
+</div>
+
+<p class="text-muted small">Report generated {{ generated|date:"d M Y, H:i" }}{% if f.date_from or f.date_to or f.produce %} &middot; Filtered{% endif %}</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3"><div class="stat-card"><small class="text-muted">Farmers registered</small><div class="stat-num text-success">{{ farmer_count }}</div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><small class="text-muted">Produce delivered</small><div class="stat-num" style="color:#2563eb">{{ delivery_total|floatformat:"-2g" }} kg</div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><small class="text-muted">Paid / unpaid</small><div class="stat-num" style="font-size:1.35rem"><span style="color:#166534">KES {{ paid_total|floatformat:"0g" }}</span><br><span style="color:#d97706">KES {{ unpaid_total|floatformat:"0g" }}</span></div></div></div>
+    <div class="col-6 col-xl-3"><div class="stat-card"><small class="text-muted">Errors open / fixed</small><div class="stat-num"><span class="text-danger">{{ open_errors }}</span> <span class="text-muted">/</span> <span class="text-success">{{ fixed_errors }}</span></div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-4"><div class="content-card h-100">
+        <div class="d-flex justify-content-between mb-3"><h5 class="fw-bold mb-0">Produce summary</h5></div>
+        {% for r in by_produce %}
+        <div class="d-flex justify-content-between border-bottom py-2"><span><strong>{{ r.produce }}</strong> <small class="text-muted">({{ r.count }} deliveries)</small></span><span>{{ r.total|floatformat:"-2g" }} kg</span></div>
+        {% empty %}<p class="text-muted mb-0">No deliveries in this period.</p>{% endfor %}
+        <div class="mt-4 no-print d-grid gap-2">
+            <a class="btn-soft justify-content-center" href="{% url 'report_export' 'farmers' %}"><i class="bi bi-download"></i> Farmers CSV</a>
+            <a class="btn-soft justify-content-center" href="{% url 'report_export' 'stock' %}"><i class="bi bi-download"></i> Stock CSV</a>
+        </div>
+    </div></div>
+
+    <div class="col-xl-8"><div class="content-card h-100">
+        <div class="d-flex justify-content-between mb-3"><h5 class="fw-bold mb-0">Deliveries report</h5>
+            <a class="btn-soft no-print" href="{% url 'report_export' 'deliveries' %}?{{ query }}"><i class="bi bi-download"></i> CSV</a></div>
+        {% if deliveries %}<div class="table-responsive"><table class="table table-sm align-middle mb-0">
+            <thead><tr><th>ID</th><th>Farmer</th><th>Produce</th><th>Qty</th><th>Date</th><th>Status</th></tr></thead><tbody>
+            {% for d in deliveries %}<tr><td>{{ d.code }}</td><td>{{ d.farmer.name }}</td><td>{{ d.produce }}</td><td>{{ d.quantity|floatformat:"-2g" }} kg</td><td>{{ d.delivery_date|date:"d M Y" }}</td><td><span class="{{ d.status|badge }}">{{ d.status }}</span></td></tr>{% endfor %}
+            </tbody></table></div>
+        {% else %}<p class="text-muted mb-0">No deliveries match these filters.</p>{% endif %}
+    </div></div>
+
+    <div class="col-xl-7"><div class="content-card">
+        <div class="d-flex justify-content-between mb-3"><h5 class="fw-bold mb-0">Payments report</h5>
+            <a class="btn-soft no-print" href="{% url 'report_export' 'payments' %}?{{ query }}"><i class="bi bi-download"></i> CSV</a></div>
+        {% if payments %}<div class="table-responsive"><table class="table table-sm align-middle mb-0">
+            <thead><tr><th>ID</th><th>Farmer</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody>
+            {% for p in payments %}<tr><td>{{ p.code }}</td><td>{{ p.farmer.name }}</td><td>KES {{ p.amount|floatformat:"2g" }}</td><td>{{ p.payment_date|date:"d M Y" }}</td><td><span class="{{ p.status|badge }}">{{ p.status }}</span></td></tr>{% endfor %}
+            </tbody></table></div>
+        {% else %}<p class="text-muted mb-0">No payments in this period.</p>{% endif %}
+    </div></div>
+
+    <div class="col-xl-5"><div class="content-card">
+        <div class="d-flex justify-content-between mb-3"><h5 class="fw-bold mb-0">Errors report</h5>
+            <a class="btn-soft no-print" href="{% url 'report_export' 'errors' %}"><i class="bi bi-download"></i> CSV</a></div>
+        {% for e in errors|slice:":8" %}
+        <div class="d-flex justify-content-between gap-2 border-bottom py-2"><span><strong>{{ e.title }}</strong> <span class="b-grey">{{ e.related_record }}</span></span><span class="{{ e.status|badge }}">{{ e.status }}</span></div>
+        {% empty %}<p class="text-muted mb-0">No errors recorded.</p>{% endfor %}
+    </div></div>
+</div>
+
+</div>
+{% endblock %}
